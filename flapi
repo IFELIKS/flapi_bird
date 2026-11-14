@@ -1,0 +1,63 @@
+import random
+import pygame
+
+window_size = (600, 600)
+
+SPEED = 10
+TUBE_SPEED = 7
+
+pygame.init()
+
+
+window = pygame.display.set_mode(window_size)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("arial", 80, bold=True)
+
+#ТРУБИ
+def make_tubes(count, width=50, height_max=450, gap = 130, interval=400):
+    x = window_size[0]
+    tmp_list = []
+    for i in range(count):
+        y = random.randint(-300,0)
+        tmp_list.append(pygame.Rect(x,y, width, height_max))
+        tmp_list.append(pygame.Rect(x,y+height_max+gap, width, height_max))
+        x += interval
+
+    return tmp_list
+
+player = pygame.Rect(20, 300, 50, 50)
+tube_list = make_tubes(100)
+game_over = False
+
+game = True
+while game:
+    events = pygame.event.get()
+    for event in events:
+        if event.type == pygame.QUIT:
+            game = False
+
+    window.fill("#33B4FF")
+    pygame.draw.rect(window, "gold", player)
+
+    if not game_over:
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_UP] and player.y > 0:
+            player.y -= SPEED
+        if keys[pygame.K_DOWN] and player.bottom < window_size[1]:
+            player.y += SPEED
+
+        for tube in tube_list:
+            tube.x -= TUBE_SPEED
+            if player.colliderect(tube):
+                game_over = True
+
+    for tube in tube_list:
+        pygame.draw.rect(window, "#37F757", tube)
+
+    if game_over:
+        text = font.render("GAME OVER", True, "red")
+        window.blit(text, text.get_rect(center=(window_size[0] // 2, window_size[1] // 2)))
+
+    clock.tick(60)
+    pygame.display.flip()
